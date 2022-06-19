@@ -858,7 +858,7 @@ function getAllToDownloadContent(toDownload, callback) {
                 }
             }, 5000);
 
-            item.getContent(function (body, encode) {
+            item.getContent(async function (body, encode) {
                 // Cancel the timeout above
                 clearTimeout(getContentTimeout);
 
@@ -891,6 +891,22 @@ function getAllToDownloadContent(toDownload, callback) {
                         content: resolvedItem.dataURI || body,
                         encoding: currentEnconding
                     });
+
+                    if (filename.search(/\.(js)/) !== -1) {
+                        try {
+                            const response = await fetch(`${item.url}.map`)
+                            const text = await response.text()
+    
+                            result.push({
+                                name: `${filename}.map`,
+                                type: 'text/plain',
+                                originalUrl: `${item.url}.map`,
+                                url: `${newURL}.map`, // Actually the path
+                                content: text,
+                                encoding: null
+                            })
+                        } catch (e) {}
+                    }
                 } else {
                     // console.log('XXX: ',newURL, item.url);
                     // Otherwise add suffix to the path and filename
